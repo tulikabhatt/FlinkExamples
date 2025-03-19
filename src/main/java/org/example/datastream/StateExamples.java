@@ -22,7 +22,7 @@ public class StateExamples {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(2);
 
-        // ✅ Kafka Source (replace topic name as needed)
+        // Kafka Source (replace topic name as needed)
         KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
                 .setBootstrapServers("localhost:9092")
                 .setTopics("crypto-prices")
@@ -33,7 +33,7 @@ public class StateExamples {
 
         DataStream<String> priceStream = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "KafkaSource");
 
-        // ✅ Parse JSON and extract (currency, price) tuples
+        // Parse JSON and extract (currency, price) tuples
         DataStream<Tuple2<String, Double>> parsedStream = priceStream.flatMap((String message, org.apache.flink.util.Collector<Tuple2<String, Double>> out) -> {
             ObjectMapper mapper = new ObjectMapper();
             try {
@@ -45,25 +45,25 @@ public class StateExamples {
             } catch (Exception ignored) {}
         }).returns(TypeInformation.of(new TypeHint<Tuple2<String, Double>>() {}));
 
-        // ✅ Tumbling window: Average price every 10 seconds
+        // Tumbling window: Average price every 10 seconds
         SingleOutputStreamOperator<Tuple2<String, Double>> tumblingAvg = parsedStream
                 .keyBy(tuple -> tuple.f0)
                 .window(TumblingProcessingTimeWindows.of(Time.seconds(10)))
                 .aggregate(new AverageAggregate());
 
-        // ✅ Sliding window: Average price over last 20s, sliding every 5s
+        // Sliding window: Average price over last 20s, sliding every 5s
         SingleOutputStreamOperator<Tuple2<String, Double>> slidingAvg = parsedStream
                 .keyBy(tuple -> tuple.f0)
                 .window(SlidingProcessingTimeWindows.of(Time.seconds(20), Time.seconds(5)))
                 .aggregate(new AverageAggregate());
 
-        // ✅ Session window: Dynamic average price with 10s inactivity gap
+        // Session window: Dynamic average price with 10s inactivity gap
         SingleOutputStreamOperator<Tuple2<String, Double>> sessionAvg = parsedStream
                 .keyBy(tuple -> tuple.f0)
                 .window(ProcessingTimeSessionWindows.withGap(Time.seconds(10)))
                 .aggregate(new AverageAggregate());
 
-        // ✅ Print results
+        // Print results
         tumblingAvg.print("Tumbling Window Avg (10s)");
         slidingAvg.print("Sliding Window Avg (20s window / 5s slide)");
         sessionAvg.print("Session Window Avg (gap 10s)");
@@ -71,7 +71,7 @@ public class StateExamples {
         env.execute("Flink Windows Demonstration");
     }
 
-    // ✅ Custom Aggregate Function to compute average price
+    // Custom Aggregate Function to compute average price
     public static class AverageAggregate implements AggregateFunction<Tuple2<String, Double>, Tuple2<Double, Integer>, Tuple2<String, Double>> {
         @Override
         public Tuple2<Double, Integer> createAccumulator() {
