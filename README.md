@@ -1,4 +1,7 @@
-If you enciunter the following error:
+As Flink Library are in provided scope, you need to check 'Add provided scope to  dependencies to classpath' in the 'Modify Options' of 'Run Configurations' to run the code.
+
+
+If you encounter the following error:
 ```
 java.lang.reflect.InaccessibleObjectException: Unable to make field private final java.lang.Object[] java.util.Arrays$ArrayList.a accessible: module java.base does not "opens java.util" to unnamed module @1ad282e0
 ```
